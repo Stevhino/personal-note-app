@@ -1,39 +1,25 @@
 import PropTypes from "prop-types";
 import NoteItemBody from "./NoteItemBody";
-import DeleteButton from "./DeleteButton";
-import ArchiveButton from "./ArchiveButton";
+import { showFormattedDate } from "../utils/index";
 
-function NoteItem({
-  id,
-  title,
-  body,
-  createdAt,
-  archived,
-  onDelete,
-  onArchive,
-}) {
+function NoteItem({ id, title, body, createdAt }) {
   return (
-    <div className="note-item">
-      <NoteItemBody title={title} body={body} createdAt={createdAt} />
-      <DeleteButton id={id} onDelete={onDelete} />
-      <ArchiveButton
+    <article className="note-item">
+      <NoteItemBody
         id={id}
-        onDelete={onDelete}
-        onArchive={onArchive}
-        archived={archived}
+        title={title}
+        body={body}
+        createdAt={showFormattedDate(createdAt)}
       />
-    </div>
+    </article>
   );
 }
 
 NoteItem.propTypes = {
-  id: PropTypes.number.isRequired,
+  id: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
   body: PropTypes.string.isRequired,
   createdAt: PropTypes.string.isRequired,
-  archived: PropTypes.bool.isRequired,
-  onDelete: PropTypes.func.isRequired,
-  onArchive: PropTypes.func.isRequired,
 };
 
 export default NoteItem;

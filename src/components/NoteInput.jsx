@@ -1,7 +1,9 @@
+import React from "react";
 import PropTypes from "prop-types";
-import { Component } from "react";
+import Buttons from "./Buttons";
+import { FaCheck } from "react-icons/fa6";
 
-class NoteInput extends Component {
+class NoteInput extends React.Component {
   constructor(props) {
     super(props);
 
@@ -16,10 +18,9 @@ class NoteInput extends Component {
   }
 
   onTitleChangeHandler(e) {
-    const limit = 50;
     this.setState(() => {
       return {
-        title: e.target.value.slice(0, limit),
+        title: e.target.value,
       };
     });
   }
@@ -57,29 +58,33 @@ class NoteInput extends Component {
   }
   render() {
     return (
-      <div className="note-input">
-        <h1>Buat Catatan</h1>
-        <form onSubmit={this.onSubmitHandler}>
-          <p className="note-input__title__char-limit">
-            Sisa Input Karakter : {50 - this.state.title.length}{" "}
-          </p>
-          <input
-            className="note-input__title"
-            type="text"
-            placeholder="Ini adalah judul ..."
-            value={this.state.title}
-            onChange={this.onTitleChangeHandler}
+      <>
+        <div className="add-new-page__input">
+          <form onSubmit={this.onSubmitHandler}>
+            <input
+              className="add-new-page__input__title"
+              type="text"
+              placeholder="Catatan rahasia"
+              value={this.state.title}
+              onChange={this.onTitleChangeHandler}
+            />
+            <textarea
+              className="add-new-page__input__body"
+              type="text"
+              placeholder="Sebenanya saya adalah ..."
+              value={this.state.body}
+              onChange={this.onBodyChangeHandler}
+            />
+          </form>
+        </div>
+        <div className="add-new-page__action">
+          <Buttons
+            title="Simpan"
+            onClick={this.onSubmitHandler}
+            icon={<FaCheck />}
           />
-          <textarea
-            className="note-input__body"
-            type="text"
-            placeholder="Tuliskan Catatanmu disini ..."
-            value={this.state.body}
-            onChange={this.onBodyChangeHandler}
-          />
-          <button type="submit">Buat</button>
-        </form>
-      </div>
+        </div>
+      </>
     );
   }
 }
