@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { getActiveNotes } from "../utils/local-data";
+import { getActiveNotes } from "../utils/api";
 import NoteList from "../components/NoteList";
 import Buttons from "../components/Buttons";
 import SearchBar from "../components/SearchBar";
@@ -35,10 +35,20 @@ class HomePage extends React.Component {
     super(props);
 
     this.state = {
-      notes: getActiveNotes(),
+      notes: [],
       keyword: props.defaultKeyword || "",
     };
     this.onKeywordChangeHandler = this.onKeywordChangeHandler.bind(this);
+  }
+
+  async componentDidMount() {
+    const { data } = await getActiveNotes();
+
+    this.setState(() => {
+      return {
+        notes: data,
+      };
+    });
   }
 
   onKeywordChangeHandler(keyword) {

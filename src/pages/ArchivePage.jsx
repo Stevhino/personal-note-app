@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { useSearchParams } from "react-router-dom";
-import { getArchivedNotes } from "../utils/local-data";
+import { getArchivedNotes } from "../utils/api";
 import NoteList from "../components/NoteList";
 import SearchBar from "../components/SearchBar";
 
@@ -24,11 +24,21 @@ class ArchivePage extends React.Component {
     super(props);
 
     this.state = {
-      notes: getArchivedNotes(),
+      notes: [],
       keyword: props.defaultKeyword || "",
     };
 
     this.onKeywordChangeHandler = this.onKeywordChangeHandler.bind(this);
+  }
+
+  async componentDidMount() {
+    const { data } = await getArchivedNotes();
+
+    this.setState(() => {
+      return {
+        notes: data,
+      };
+    });
   }
 
   onKeywordChangeHandler(keyword) {

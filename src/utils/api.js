@@ -96,7 +96,7 @@ async function getActiveNotes() {
   return { error: false, data: responseJson.data };
 }
 
-async function getArchiveNotes() {
+async function getArchivedNotes() {
   const response = await fetchWithToken(`${BASE_URL}/notes/archived`);
   const responseJson = await response.json();
 
@@ -132,7 +132,7 @@ async function archiveNote(id) {
   return { error: false, data: responseJson.data };
 }
 
-async function unArchiveNote(id) {
+async function unarchiveNote(id) {
   const response = await fetchWithToken(`${BASE_URL}/notes/${id}/unarchive`, {
     method: "POST",
   });
@@ -169,9 +169,9 @@ export {
   getUserLogged,
   addNote,
   getActiveNotes,
-  getArchiveNotes,
+  getArchivedNotes,
   getNote,
   archiveNote,
-  unArchiveNote,
+  unarchiveNote,
   deleteNote,
 };
