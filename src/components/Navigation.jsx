@@ -1,15 +1,28 @@
+import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
+import { FiLogOut } from "react-icons/fi";
 
-function Navigation() {
+function Navigation({ logout, name }) {
   return (
     <nav className="navigation">
       <ul>
         <li>
           <Link to="/archives">Arsip</Link>
         </li>
+        <li>
+          <button className="button-logout" onClick={logout} title="Logout">
+            {name}
+            <FiLogOut />
+          </button>
+        </li>
       </ul>
     </nav>
   );
 }
+
+Navigation.propTypes = {
+  logout: PropTypes.func.isRequired,
+  name: PropTypes.string.isRequired,
+};
 
 export default Navigation;
