@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { useSearchParams } from "react-router-dom";
 import { getArchivedNotes } from "../utils/api";
+import { LocaleConsumer } from "../contexts/LocaleContext";
 import NoteList from "../components/NoteList";
 import SearchBar from "../components/SearchBar";
 
@@ -59,14 +60,20 @@ class ArchivePage extends React.Component {
     });
 
     return (
-      <section className="archive-page">
-        <h2>Catatan Arsip</h2>
-        <SearchBar
-          keyword={this.state.keyword}
-          keywordChange={this.onKeywordChangeHandler}
-        />
-        <NoteList notes={notes} />
-      </section>
+      <LocaleConsumer>
+        {({ locale }) => {
+          return (
+            <section className="archive-page">
+              <h2>{locale === "id" ? "Catatan Arsip" : "Archived Notes"}</h2>
+              <SearchBar
+                keyword={this.state.keyword}
+                keywordChange={this.onKeywordChangeHandler}
+              />
+              <NoteList notes={notes} />
+            </section>
+          );
+        }}
+      </LocaleConsumer>
     );
   }
 }

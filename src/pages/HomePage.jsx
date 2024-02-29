@@ -2,10 +2,11 @@ import React from "react";
 import PropTypes from "prop-types";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { getActiveNotes } from "../utils/api";
+import { LocaleConsumer } from "../contexts/LocaleContext";
+import { FiPlus } from "react-icons/fi";
 import NoteList from "../components/NoteList";
 import Buttons from "../components/Buttons";
 import SearchBar from "../components/SearchBar";
-import { FiPlus } from "react-icons/fi";
 
 function HomePageWrapper() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -68,21 +69,27 @@ class HomePage extends React.Component {
         .includes(this.state.keyword.toLowerCase());
     });
     return (
-      <section className="homepage">
-        <h2>Catatan Aktif</h2>
-        <SearchBar
-          keyword={this.state.keyword}
-          keywordChange={this.onKeywordChangeHandler}
-        />
-        <NoteList notes={notes} />
-        <div className="homepage__action">
-          <Buttons
-            title="Tambah"
-            onClick={this.props.onAddHandler}
-            icon={<FiPlus />}
-          />
-        </div>
-      </section>
+      <LocaleConsumer>
+        {({ locale }) => {
+          return (
+            <section className="homepage">
+              <h2>{locale === "id" ? "Catatan Aktif" : "Active Notes"}</h2>
+              <SearchBar
+                keyword={this.state.keyword}
+                keywordChange={this.onKeywordChangeHandler}
+              />
+              <NoteList notes={notes} />
+              <div className="homepage__action">
+                <Buttons
+                  title="Tambah"
+                  onClick={this.props.onAddHandler}
+                  icon={<FiPlus />}
+                />
+              </div>
+            </section>
+          );
+        }}
+      </LocaleConsumer>
     );
   }
 }
