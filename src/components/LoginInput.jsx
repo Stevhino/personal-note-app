@@ -1,70 +1,41 @@
-import React from "react";
 import PropTypes from "prop-types";
+import useInput from "../hooks/useInput";
 
-class LoginInput extends React.Component {
-  constructor(props) {
-    super(props);
+function LoginInput({ login }) {
+  const [email, onEmailChange] = useInput("");
+  const [password, onPasswordChange] = useInput("");
 
-    this.state = {
-      email: "",
-      password: "",
-    };
-
-    this.onEmailChangeHandler = this.onEmailChangeHandler.bind(this);
-    this.onPasswordChangeHandler = this.onPasswordChangeHandler.bind(this);
-    this.onSubmitHandler = this.onSubmitHandler.bind(this);
-  }
-
-  onEmailChangeHandler(e) {
-    this.setState(() => {
-      return {
-        email: e.target.value,
-      };
-    });
-  }
-
-  onPasswordChangeHandler(e) {
-    this.setState(() => {
-      return {
-        password: e.target.value,
-      };
-    });
-  }
-
-  onSubmitHandler(e) {
+  function onSubmitHandler(e) {
     e.preventDefault();
-
-    this.props.login({
-      email: this.state.email,
-      password: this.state.password,
+    login({
+      email,
+      password,
     });
   }
 
-  render() {
-    return (
-      <div className="input-login">
-        <form onSubmit={this.onSubmitHandler}>
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            value={this.state.email}
-            onChange={this.onEmailChangeHandler}
-            autoComplete="new-email"
-          />
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={this.state.password}
-            onChange={this.onPasswordChangeHandler}
-            autoComplete="new-password"
-          />
-          <button type="submit">Login</button>
-        </form>
-      </div>
-    );
-  }
+  return (
+    <div className="input-login">
+      <form onSubmit={onSubmitHandler}>
+        <label htmlFor="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          value={email}
+          onChange={onEmailChange}
+          autoComplete="new-email"
+        />
+        <label htmlFor="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          value={password}
+          onChange={onPasswordChange}
+          autoComplete="new-password"
+        />
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  );
 }
 
 LoginInput.propTypes = {
