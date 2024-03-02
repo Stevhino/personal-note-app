@@ -1,9 +1,12 @@
 import PropTypes from "prop-types";
+import { useContext } from "react";
 import { Link } from "react-router-dom";
-import LoginInput from "../components/LoginInput";
 import { login } from "../utils/api";
+import LoginInput from "../components/LoginInput";
+import LocaleContext from "../contexts/LocaleContext";
 
 function LoginPage({ loginSuccess }) {
+  const { locale } = useContext(LocaleContext);
   async function onLogin({ email, password }) {
     const { error, data } = await login({ email, password });
 
@@ -13,10 +16,17 @@ function LoginPage({ loginSuccess }) {
   }
   return (
     <section className="login-page">
-      <h2>Yuk, login untuk menggunakan aplikasi.</h2>
+      <h2>
+        {locale === "id"
+          ? "Yuk, login untuk menggunakan aplikasi."
+          : "Login to use app, please."}
+      </h2>
       <LoginInput login={onLogin} />
       <p>
-        Belum punya akun? <Link to="/register">Daftar di sini</Link>
+        {locale === "id" ? "Belum punya akun?" : "Don't have an account?"}
+        <Link to="/register">
+          {locale === "id" ? " Daftar di sini?" : " Register here"}
+        </Link>
       </p>
     </section>
   );
