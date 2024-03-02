@@ -1,11 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import { getUserLogged, putAccessToken } from "./utils/api";
-import { LocaleProvider } from "./contexts/LocaleContext";
-import { ThemeProvider } from "./contexts/ThemeContext";
 import { FiMoon, FiSun } from "react-icons/fi";
 import { SiGoogletranslate } from "react-icons/si";
-import Navigation from "./components/Navigation";
 import HomePage from "./pages/HomePage";
 import AddPage from "./pages/AddPage";
 import ArchivePage from "./pages/ArchivePage";
@@ -13,163 +10,137 @@ import DetailPage from "./pages/DetailPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
+import Navigation from "./components/Navigation";
+import LocaleContext from "./contexts/LocaleContext";
+import ThemeContext from "./contexts/ThemeContext";
 
-class App extends React.Component {
-  constructor(props) {
-    super(props);
+function App() {
+  const [authedUser, setAuthedUser] = useState(null);
+  const [initializing, setInitializing] = useState(true);
+  const [locale, setLocale] = useState(localStorage.getItem("locale") || "id");
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
 
-    this.state = {
-      authedUser: null,
-      initializing: true,
-      localeContext: {
-        locale: "id",
-        toggleLocale: () => {
-          this.setState((prevState) => {
-            return {
-              localeContext: {
-                ...prevState.localeContext,
-                locale: prevState.localeContext.locale === "id" ? "en" : "id",
-              },
-            };
-          });
-        },
-      },
-      themeContext: {
-        theme: "dark",
-        toggleTheme: () => {
-          this.setState((prevState) => {
-            return {
-              themeContext: {
-                ...prevState.themeContext,
-                theme:
-                  prevState.themeContext.theme === "dark" ? "light" : "dark",
-              },
-            };
-          });
-        },
-      },
-    };
-
-    this.onLoginSuccess = this.onLoginSuccess.bind(this);
-    this.onLogout = this.onLogout.bind(this);
-  }
-
-  async componentDidMount() {
-    const { data } = await getUserLogged();
-
-    this.setState(() => {
-      return {
-        authedUser: data,
-        initializing: false,
-      };
+  function toggleLocale() {
+    setLocale((prevLocale) => {
+      const newLocale = prevLocale === "id" ? "en" : "id";
+      localStorage.setItem("locale", newLocale);
+      return newLocale;
     });
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.themeContext.theme !== this.state.themeContext.theme) {
-      document.documentElement.setAttribute(
-        "data-theme",
-        this.state.themeContext.theme
-      );
-    }
+  const localeContextValue = React.useMemo(() => {
+    return {
+      locale,
+      toggleLocale,
+    };
+  }, [locale]);
+
+  function toggleTheme() {
+    setTheme((prevTheme) => {
+      const newTheme = prevTheme === "dark" ? "light" : "dark";
+      localStorage.setItem("theme", newTheme);
+      return newTheme;
+    });
   }
 
-  async onLoginSuccess({ accessToken }) {
+  const themeContextValue = React.useMemo(() => {
+    return {
+      theme,
+      toggleTheme,
+    };
+  }, [theme]);
+
+  useEffect(() => {
+    async function fetchNotesData() {
+      const { data } = await getUserLogged();
+      setAuthedUser(data);
+      setInitializing(false);
+    }
+    fetchNotesData();
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+
+  async function onLoginSuccess({ accessToken }) {
     putAccessToken(accessToken);
     const { data } = await getUserLogged();
-
-    this.setState(() => {
-      return {
-        authedUser: data,
-      };
-    });
+    setAuthedUser(data);
   }
 
-  onLogout() {
-    this.setState(() => {
-      return {
-        authedUser: null,
-      };
-    });
-
+  async function onLogout() {
+    setAuthedUser(null);
     putAccessToken("");
   }
 
-  render() {
-    if (this.state.initializing) {
-      return null;
-    }
+  if (initializing) return null;
 
-    if (this.state.authedUser === null) {
-      return (
-        <LocaleProvider value={this.state.localeContext}>
-          <ThemeProvider value={this.state.themeContext}>
-            <div className="app-container">
-              <header>
-                <h1>
-                  <Link to="/">
-                    {this.state.localeContext.locale === "id"
-                      ? "Aplikasi Catatan Pribadi"
-                      : "Personal Notes App"}
-                  </Link>
-                </h1>
-                <button
-                  className="toggle-locale"
-                  onClick={this.state.localeContext.toggleLocale}
-                >
-                  <SiGoogletranslate />
-                </button>
-                <button
-                  className="toggle-theme"
-                  onClick={this.state.themeContext.toggleTheme}
-                >
-                  {this.state.themeContext.theme === "dark" ? (
-                    <FiSun />
-                  ) : (
-                    <FiMoon />
-                  )}
-                </button>
-              </header>
-              <main>
-                <Routes>
-                  <Route
-                    path="/*"
-                    element={<LoginPage loginSuccess={this.onLoginSuccess} />}
-                  />
-                  <Route path="/register" element={<RegisterPage />} />
-                </Routes>
-              </main>
-            </div>
-          </ThemeProvider>
-        </LocaleProvider>
-      );
-    }
-
+  if (authedUser === null) {
     return (
-      <LocaleProvider value={this.state.localeContext}>
-        <ThemeProvider value={this.state.themeContext}>
+      <LocaleContext.Provider value={localeContextValue}>
+        <ThemeContext.Provider value={themeContextValue}>
           <div className="app-container">
             <header>
-              <Navigation
-                logout={this.onLogout}
-                name={this.state.authedUser.name}
-                toggleTheme={this.state.themeContext.toggleTheme}
-              />
+              <h1>
+                <Link to="/">
+                  {localeContextValue.locale === "id"
+                    ? "Aplikasi Catatan Pribadi"
+                    : "Personal Notes App"}
+                </Link>
+              </h1>
+              <button
+                className="toggle-locale"
+                onClick={localeContextValue.toggleLocale}
+              >
+                <SiGoogletranslate />
+              </button>
+              <button
+                className="toggle-theme"
+                onClick={themeContextValue.toggleTheme}
+              >
+                {themeContextValue.theme === "dark" ? <FiSun /> : <FiMoon />}
+              </button>
             </header>
             <main>
               <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/notes/new" element={<AddPage />} />
-                <Route path="/archives" element={<ArchivePage />} />
-                <Route path="/notes/:id" element={<DetailPage />} />
-                <Route path="*" element={<NotFoundPage />} />
+                <Route
+                  path="/*"
+                  element={<LoginPage loginSuccess={onLoginSuccess} />}
+                />
+                <Route path="/register" element={<RegisterPage />} />
               </Routes>
             </main>
           </div>
-        </ThemeProvider>
-      </LocaleProvider>
+        </ThemeContext.Provider>
+      </LocaleContext.Provider>
     );
   }
+
+  return (
+    <LocaleContext.Provider value={localeContextValue}>
+      <ThemeContext.Provider value={themeContextValue}>
+        <div className="app-container">
+          <header>
+            <Navigation
+              logout={onLogout}
+              name={authedUser.name}
+              toggleTheme={themeContextValue.toggleTheme}
+            />
+          </header>
+          <main>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/notes/new" element={<AddPage />} />
+              <Route path="/archives" element={<ArchivePage />} />
+              <Route path="/notes/:id" element={<DetailPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </main>
+        </div>
+      </ThemeContext.Provider>
+    </LocaleContext.Provider>
+  );
 }
 
 export default App;

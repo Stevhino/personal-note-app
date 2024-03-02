@@ -1,117 +1,61 @@
-import React from "react";
-import PropTypes from "prop-types";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { getNote, deleteNote, archiveNote, unarchiveNote } from "../utils/api";
+import { BiArchiveIn, BiArchiveOut } from "react-icons/bi";
+import { FiTrash2 } from "react-icons/fi";
 import Buttons from "../components/Buttons";
 import NoteDetail from "../components/NoteDetail";
-import { getNote, deleteNote, archiveNote, unarchiveNote } from "../utils/api";
-import { FiTrash2 } from "react-icons/fi";
-import { BiArchiveIn, BiArchiveOut } from "react-icons/bi";
 
-function DetailPageWrapper() {
+function DetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  async function deleteHandler(id, archived) {
+  const [note, setNote] = useState(null);
+
+  useEffect(() => {
+    async function fetchNotesData() {
+      const { data } = await getNote(id);
+      setNote(data);
+    }
+    fetchNotesData();
+  }, [id]);
+
+  async function deleteNoteHandler() {
     await deleteNote(id);
-    archived ? navigate("/archives") : navigate("/");
+    note.archived ? navigate("/archives") : navigate("/");
   }
 
-  async function archiveHandler(id) {
+  async function archiveNoteHandler() {
     await archiveNote(id);
     navigate("/");
   }
 
-  async function unArchiveHandler(id) {
+  async function unArchiveNoteHandler() {
     await unarchiveNote(id);
     navigate("/archives");
   }
 
+  if (!note) {
+    return <p>Loading...</p>; // Render loading indicator while fetching data
+  }
+
   return (
-    <DetailPage
-      id={id}
-      onDeleteButton={deleteHandler}
-      onArchivedButton={archiveHandler}
-      onUnArchiveButton={unArchiveHandler}
-    />
+    <section className="detail-page">
+      <NoteDetail {...note} />
+      <div className="detail-page__action">
+        <Buttons
+          title={note.archived ? "Aktifkan" : "Arsipkan"}
+          onClick={note.archived ? unArchiveNoteHandler : archiveNoteHandler}
+          icon={note.archived ? <BiArchiveOut /> : <BiArchiveIn />}
+        />
+        <Buttons
+          title="Hapus"
+          onClick={deleteNoteHandler}
+          icon={<FiTrash2 />}
+        />
+      </div>
+    </section>
   );
 }
 
-class DetailPage extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      note: null,
-    };
-
-    this.onClickDeleteButton = this.onClickDeleteButton.bind(this);
-    this.onClickArchivedButton = this.onClickArchivedButton.bind(this);
-    this.onClickUnArchiveButton = this.onClickUnArchiveButton.bind(this);
-  }
-
-  async componentDidMount() {
-    const { id } = this.props;
-    const { data } = await getNote(id);
-
-    this.setState(() => {
-      return {
-        note: data,
-      };
-    });
-  }
-
-  onClickDeleteButton() {
-    const { id } = this.props;
-    const { note } = this.state;
-    this.props.onDeleteButton(id, note.archived);
-  }
-
-  onClickArchivedButton() {
-    const { id } = this.props;
-    this.props.onArchivedButton(id);
-  }
-
-  onClickUnArchiveButton() {
-    const { id } = this.props;
-    this.props.onUnArchiveButton(id);
-  }
-
-  render() {
-    const { note } = this.state;
-
-    if (!note) {
-      return <p>Loading...</p>; // Render loading indicator while fetching data
-    }
-
-    return (
-      <section className="detail-page">
-        <NoteDetail {...this.state.note} />
-        <div className="detail-page__action">
-          <Buttons
-            title={this.state.note.archived ? "Aktifkan" : "Arsipkan"}
-            onClick={
-              this.state.note.archived
-                ? this.onClickUnArchiveButton
-                : this.onClickArchivedButton
-            }
-            icon={this.state.note.archived ? <BiArchiveOut /> : <BiArchiveIn />}
-          />
-          <Buttons
-            title="Hapus"
-            onClick={this.onClickDeleteButton}
-            icon={<FiTrash2 />}
-          />
-        </div>
-      </section>
-    );
-  }
-}
-
-DetailPage.propTypes = {
-  id: PropTypes.string.isRequired,
-  onDeleteButton: PropTypes.func.isRequired,
-  onArchivedButton: PropTypes.func.isRequired,
-  onUnArchiveButton: PropTypes.func.isRequired,
-};
-
-export default DetailPageWrapper;
+export default DetailPage;

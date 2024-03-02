@@ -1,103 +1,53 @@
-import React from "react";
-import PropTypes from "prop-types";
+import { useContext, useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { getActiveNotes } from "../utils/api";
-import { LocaleConsumer } from "../contexts/LocaleContext";
 import { FiPlus } from "react-icons/fi";
 import NoteList from "../components/NoteList";
 import Buttons from "../components/Buttons";
 import SearchBar from "../components/SearchBar";
+import LocaleContext from "../contexts/LocaleContext";
 
-function HomePageWrapper() {
+function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [notes, setNotes] = useState([]);
+  const { locale } = useContext(LocaleContext);
 
-  const keyword = searchParams.get("keyword");
+  const [keyword, setKeyword] = useState(() => {
+    return searchParams.get("keyword") || "";
+  });
 
-  function changeSearchParams(keyword) {
-    setSearchParams({ keyword });
-  }
+  useEffect(() => {
+    async function fetchNotesData() {
+      const { data } = await getActiveNotes();
+      setNotes(data);
+    }
+    fetchNotesData();
+  }, []);
 
   const navigate = useNavigate();
-  function addHandler() {
+  function onAddHandler() {
     navigate("/notes/new");
   }
 
+  function onKeywordChangeHandler(keyword) {
+    setKeyword(keyword);
+    setSearchParams({ keyword });
+  }
+
+  const filteredNotes = notes.filter((note) => {
+    return note.title.toLowerCase().includes(keyword.toLowerCase());
+  });
+
   return (
-    <HomePage
-      defaultKeyword={keyword}
-      keywordChange={changeSearchParams}
-      onAddHandler={addHandler}
-    />
+    <section className="homepage">
+      <h2>{locale === "id" ? "Catatan Aktif" : "Active Notes"}</h2>
+      <SearchBar keyword={keyword} keywordChange={onKeywordChangeHandler} />
+      <NoteList notes={filteredNotes} />
+      <div className="homepage__action">
+        <Buttons title="Tambah" onClick={onAddHandler} icon={<FiPlus />} />
+      </div>
+    </section>
   );
 }
 
-class HomePage extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      notes: [],
-      keyword: props.defaultKeyword || "",
-    };
-    this.onKeywordChangeHandler = this.onKeywordChangeHandler.bind(this);
-  }
-
-  async componentDidMount() {
-    const { data } = await getActiveNotes();
-
-    this.setState(() => {
-      return {
-        notes: data,
-      };
-    });
-  }
-
-  onKeywordChangeHandler(keyword) {
-    this.setState(() => {
-      return {
-        keyword,
-      };
-    });
-
-    this.props.keywordChange(keyword);
-  }
-
-  render() {
-    const notes = this.state.notes.filter((note) => {
-      return note.title
-        .toLowerCase()
-        .includes(this.state.keyword.toLowerCase());
-    });
-    return (
-      <LocaleConsumer>
-        {({ locale }) => {
-          return (
-            <section className="homepage">
-              <h2>{locale === "id" ? "Catatan Aktif" : "Active Notes"}</h2>
-              <SearchBar
-                keyword={this.state.keyword}
-                keywordChange={this.onKeywordChangeHandler}
-              />
-              <NoteList notes={notes} />
-              <div className="homepage__action">
-                <Buttons
-                  title="Tambah"
-                  onClick={this.props.onAddHandler}
-                  icon={<FiPlus />}
-                />
-              </div>
-            </section>
-          );
-        }}
-      </LocaleConsumer>
-    );
-  }
-}
-
-HomePage.propTypes = {
-  defaultKeyword: PropTypes.string,
-  keywordChange: PropTypes.func.isRequired,
-  onAddHandler: PropTypes.func.isRequired,
-};
-
-export default HomePageWrapper;
+export default HomePage;
