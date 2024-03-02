@@ -1,87 +1,63 @@
-import React from "react";
 import PropTypes from "prop-types";
+import useInput from "../hooks/useInput";
 
-class RegisterInput extends React.Component {
-  constructor(props) {
-    super(props);
+function RegisterInput({ register }) {
+  const [name, onNameChange] = useInput("");
+  const [email, onEmailChange] = useInput("");
+  const [password, onPasswordChange] = useInput("");
+  const [confirmPassword, onConfirmPasswordChange] = useInput("");
 
-    this.state = {
-      name: "",
-      email: "",
-      password: "",
-    };
-
-    this.onNameChange = this.onNamaChange.bind(this);
-    this.onEmailChange = this.onEmailChange.bind(this);
-    this.onPasswordChange = this.onPasswordChange.bind(this);
-    this.onSubmitHandler = this.onSubmitHandler.bind(this);
-  }
-
-  onNamaChange(e) {
-    this.setState(() => {
-      return {
-        name: e.target.value,
-      };
-    });
-  }
-
-  onEmailChange(e) {
-    this.setState(() => {
-      return {
-        email: e.target.value,
-      };
-    });
-  }
-
-  onPasswordChange(e) {
-    this.setState(() => {
-      return {
-        password: e.target.value,
-      };
-    });
-  }
-
-  onSubmitHandler(e) {
+  function onSubmitHandler(e) {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      return alert("Password and password confirm must be same.");
+    }
 
-    this.props.register({
-      name: this.state.name,
-      email: this.state.email,
-      password: this.state.password,
+    register({
+      name,
+      email,
+      password,
     });
   }
 
-  render() {
-    return (
-      <div className="input-register">
-        <form onSubmit={this.onSubmitHandler}>
-          <label htmlFor="name">Name</label>
-          <input
-            type="text"
-            placeholder="Nama"
-            value={this.state.name}
-            onChange={this.onNameChange}
-          />
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            placeholder="Email"
-            value={this.state.email}
-            onChange={this.onEmailChange}
-          />
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            placeholder="Password"
-            autoComplete="current-password"
-            value={this.state.password}
-            onChange={this.onPasswordChange}
-          />
-          <button type="submit">Register</button>
-        </form>
-      </div>
-    );
-  }
+  return (
+    <div className="input-register">
+      <form onSubmit={onSubmitHandler}>
+        <label htmlFor="name">Name</label>
+        <input
+          type="text"
+          placeholder="Nama"
+          value={name}
+          onChange={onNameChange}
+        />
+        <label htmlFor="email">Email</label>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={onEmailChange}
+        />
+        <label htmlFor="password">Password</label>
+        <input
+          type="password"
+          placeholder="Password"
+          autoComplete="new-password"
+          value={password}
+          onChange={onPasswordChange}
+        />
+        <label htmlFor="confirm password">Confirm Password</label>
+        <input
+          id="confirmPassword"
+          type="password"
+          placeholder="Confirm Password"
+          autoComplete="new-confirm-password"
+          value={confirmPassword}
+          onChange={onConfirmPasswordChange}
+        />
+        <button type="submit">Register</button>
+      </form>
+    </div>
+  );
 }
 
 RegisterInput.propTypes = {
