@@ -1,7 +1,10 @@
 import PropTypes from "prop-types";
+import { useContext } from "react";
+import LocaleContext from "../contexts/LocaleContext";
 import NoteItem from "./NoteItem";
 
 function NoteList({ notes }) {
+  const { locale } = useContext(LocaleContext);
   if (notes.length > 0) {
     return (
       <section className="notes-list">
@@ -13,7 +16,9 @@ function NoteList({ notes }) {
   }
   return (
     <section className="notes-list-empty">
-      <p className="notes-list__empty">Tidak ada catatan</p>
+      <p className="notes-list__empty">
+        {locale === "id" ? "Tidak ada catatan" : "No notes"}
+      </p>
     </section>
   );
 }
